@@ -30,7 +30,7 @@ const swaggerOptions = {
     openapi: '3.0.0',
     info: {
       title: '🏨 Hotel Booking API',
-      version: '1.0.0',
+      version: '2.0.0',
       description: `
         <div style="font-family: 'Inter', sans-serif; line-height: 1.6;">
           <h3 style="color: #2563eb; margin-bottom: 15px;">Welcome to Hotel Booking API! 🎉</h3>
@@ -42,9 +42,9 @@ const swaggerOptions = {
           <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 15px; margin: 15px 0;">
             <h4 style="color: #0c4a6e; margin: 0 0 10px 0;">🚀 Quick Start:</h4>
             <ol style="color: #0c4a6e; margin: 0; padding-left: 20px;">
-              <li>Register a new user account</li>
+              <li>Register a new user account (Client or Manager)</li>
               <li>Login to get your authentication token</li>
-              <li>Browse available rooms</li>
+              <li>Browse available rooms or create rooms (Manager only)</li>
               <li>Create bookings with detailed guest information</li>
             </ol>
           </div>
@@ -57,11 +57,12 @@ const swaggerOptions = {
           <div style="background: #f0fdf4; border: 1px solid #10b981; border-radius: 8px; padding: 15px; margin: 15px 0;">
             <h4 style="color: #065f46; margin: 0 0 10px 0;">📱 Features:</h4>
             <ul style="color: #065f46; margin: 0; padding-left: 20px;">
-              <li>User registration & authentication</li>
+              <li>User registration & authentication with phone validation</li>
               <li>Room management & availability checking</li>
-              <li>Booking creation with guest details</li>
+              <li>Booking creation with complete guest details</li>
               <li>Real-time form validation</li>
               <li>Role-based access control (Client/Manager)</li>
+              <li>Comprehensive error handling</li>
             </ul>
           </div>
         </div>
@@ -87,73 +88,305 @@ const swaggerOptions = {
         bearerAuth: {
           type: 'http',
           scheme: 'bearer',
-          bearerFormat: 'JWT'
+          bearerFormat: 'JWT',
+          description: 'Enter your JWT token (e.g., eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...)'
         }
       },
       schemas: {
         User: {
           type: 'object',
+          required: ['firstName', 'lastName', 'email', 'phone', 'password'],
           properties: {
-            id: { type: 'string' },
-            firstName: { type: 'string' },
-            lastName: { type: 'string' },
-            email: { type: 'string', format: 'email' },
-            role: { type: 'string', enum: ['client', 'manager'] }
+            id: { 
+              type: 'string',
+              description: 'Unique user identifier',
+              example: '507f1f77bcf86cd799439011'
+            },
+            firstName: { 
+              type: 'string',
+              description: 'User first name',
+              example: 'John'
+            },
+            lastName: { 
+              type: 'string',
+              description: 'User last name',
+              example: 'Doe'
+            },
+            email: { 
+              type: 'string', 
+              format: 'email',
+              description: 'User email address',
+              example: 'john.doe@example.com'
+            },
+            phone: {
+              type: 'string',
+              description: '10-digit Indian mobile number',
+              example: '9876543210'
+            },
+            role: { 
+              type: 'string', 
+              enum: ['client', 'manager'],
+              description: 'User role',
+              example: 'client'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Account creation timestamp'
+            }
           }
         },
         Room: {
           type: 'object',
+          required: ['roomNumber', 'name', 'image', 'capacity', 'size', 'originalPrice', 'currentPrice', 'taxes', 'total', 'description'],
           properties: {
-            _id: { type: 'string' },
-            name: { type: 'string' },
-            image: { type: 'string' },
-            capacity: { type: 'number' },
-            size: { type: 'string' },
-            originalPrice: { type: 'number' },
-            currentPrice: { type: 'number' },
-            taxes: { type: 'number' },
-            total: { type: 'number' },
-            description: { type: 'string' },
-            amenities: { type: 'array', items: { type: 'string' } },
-            availability: { type: 'string', enum: ['Available', 'Limited', 'Unavailable'] },
-            isActive: { type: 'boolean' },
-            createdBy: { type: 'string' },
-            createdAt: { type: 'string', format: 'date-time' },
-            updatedAt: { type: 'string', format: 'date-time' }
+            _id: { 
+              type: 'string',
+              description: 'Unique room identifier',
+              example: '507f1f77bcf86cd799439011'
+            },
+            roomNumber: {
+              type: 'string',
+              description: 'Room number (e.g., 101, Deluxe A)',
+              example: '101'
+            },
+            name: { 
+              type: 'string',
+              description: 'Room name',
+              example: 'Deluxe Suite'
+            },
+            image: { 
+              type: 'string',
+              description: 'Room image URL or base64',
+              example: 'https://example.com/room-image.jpg'
+            },
+            capacity: { 
+              type: 'number',
+              description: 'Maximum number of guests',
+              example: 2
+            },
+            size: { 
+              type: 'string',
+              description: 'Room size',
+              example: '320 sq. ft.'
+            },
+            originalPrice: { 
+              type: 'number',
+              description: 'Original room price',
+              example: 25000
+            },
+            currentPrice: { 
+              type: 'number',
+              description: 'Current room price',
+              example: 20000
+            },
+            taxes: { 
+              type: 'number',
+              description: 'Tax amount',
+              example: 2000
+            },
+            total: { 
+              type: 'number',
+              description: 'Total price including taxes',
+              example: 22000
+            },
+            description: { 
+              type: 'string',
+              description: 'Room description',
+              example: 'Luxurious suite with ocean view'
+            },
+            amenities: { 
+              type: 'array', 
+              items: { type: 'string' },
+              description: 'Room amenities',
+              example: ['WiFi', 'Air Conditioning', 'Mini Bar']
+            },
+            availability: { 
+              type: 'string', 
+              enum: ['Available', 'Limited', 'Unavailable'],
+              description: 'Room availability status',
+              example: 'Available'
+            },
+            isActive: { 
+              type: 'boolean',
+              description: 'Whether room is active',
+              example: true
+            },
+            createdBy: { 
+              type: 'string',
+              description: 'ID of the manager who created the room',
+              example: '507f1f77bcf86cd799439011'
+            },
+            createdAt: { 
+              type: 'string', 
+              format: 'date-time',
+              description: 'Room creation timestamp'
+            },
+            updatedAt: { 
+              type: 'string', 
+              format: 'date-time',
+              description: 'Room last update timestamp'
+            }
           }
         },
         Booking: {
           type: 'object',
+          required: ['room', 'checkIn', 'checkOut', 'guests', 'guestDetails'],
           properties: {
-            _id: { type: 'string' },
-            room: { type: 'string' },
-            user: { type: 'string' },
-            checkIn: { type: 'string', format: 'date' },
-            checkOut: { type: 'string', format: 'date' },
-            guests: { type: 'number' },
-            totalAmount: { type: 'number' },
-            status: { type: 'string', enum: ['pending', 'confirmed', 'cancelled', 'completed'] },
-            specialRequests: { type: 'string' },
+            _id: { 
+              type: 'string',
+              description: 'Unique booking identifier',
+              example: '507f1f77bcf86cd799439011'
+            },
+            room: { 
+              type: 'string',
+              description: 'Room ID',
+              example: '507f1f77bcf86cd799439012'
+            },
+            user: { 
+              type: 'string',
+              description: 'User ID who made the booking',
+              example: '507f1f77bcf86cd799439013'
+            },
+            checkIn: { 
+              type: 'string', 
+              format: 'date',
+              description: 'Check-in date',
+              example: '2024-01-15'
+            },
+            checkOut: { 
+              type: 'string', 
+              format: 'date',
+              description: 'Check-out date',
+              example: '2024-01-17'
+            },
+            guests: { 
+              type: 'number',
+              description: 'Number of guests',
+              example: 2
+            },
+            totalAmount: { 
+              type: 'number',
+              description: 'Total booking amount',
+              example: 30000
+            },
+            status: { 
+              type: 'string', 
+              enum: ['pending', 'confirmed', 'cancelled', 'completed'],
+              description: 'Booking status',
+              example: 'pending'
+            },
+            specialRequests: { 
+              type: 'string',
+              description: 'Special requests from guest',
+              example: 'Late check-in requested'
+            },
             guestDetails: {
               type: 'object',
+              required: ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'state', 'pincode'],
               properties: {
-                firstName: { type: 'string' },
-                lastName: { type: 'string' },
-                email: { type: 'string' },
-                phone: { type: 'string' }
+                firstName: { 
+                  type: 'string',
+                  description: 'Guest first name',
+                  example: 'John'
+                },
+                lastName: { 
+                  type: 'string',
+                  description: 'Guest last name',
+                  example: 'Doe'
+                },
+                email: { 
+                  type: 'string',
+                  format: 'email',
+                  description: 'Guest email address',
+                  example: 'john.doe@example.com'
+                },
+                phone: { 
+                  type: 'string',
+                  description: 'Guest phone number',
+                  example: '9876543210'
+                },
+                address: {
+                  type: 'string',
+                  description: 'Guest address',
+                  example: '123 Main Street, Apartment 4B'
+                },
+                city: {
+                  type: 'string',
+                  description: 'Guest city',
+                  example: 'Mumbai'
+                },
+                state: {
+                  type: 'string',
+                  description: 'Guest state',
+                  example: 'Maharashtra'
+                },
+                pincode: {
+                  type: 'string',
+                  description: 'Guest pincode',
+                  example: '400001'
+                }
               }
             },
-            createdAt: { type: 'string', format: 'date-time' },
-            updatedAt: { type: 'string', format: 'date-time' }
+            createdAt: { 
+              type: 'string', 
+              format: 'date-time',
+              description: 'Booking creation timestamp'
+            },
+            updatedAt: { 
+              type: 'string', 
+              format: 'date-time',
+              description: 'Booking last update timestamp'
+            }
           }
         },
         ApiResponse: {
           type: 'object',
           properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' },
-            data: { type: 'object' },
-            count: { type: 'number' }
+            success: { 
+              type: 'boolean',
+              description: 'Indicates if the request was successful',
+              example: true
+            },
+            message: { 
+              type: 'string',
+              description: 'Response message',
+              example: 'Operation completed successfully'
+            },
+            data: { 
+              type: 'object',
+              description: 'Response data'
+            },
+            count: { 
+              type: 'number',
+              description: 'Number of items returned (for list endpoints)',
+              example: 10
+            }
+          }
+        },
+        ErrorResponse: {
+          type: 'object',
+          properties: {
+            success: { 
+              type: 'boolean',
+              example: false
+            },
+            message: { 
+              type: 'string',
+              description: 'Error message',
+              example: 'Validation failed'
+            },
+            errors: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  field: { type: 'string' },
+                  message: { type: 'string' }
+                }
+              },
+              description: 'Detailed validation errors'
+            }
           }
         }
       }
@@ -164,7 +397,7 @@ const swaggerOptions = {
       }
     ]
   },
-  apis: ['./routes/*.js', './controllers/*.js']
+  apis: ['./routes/*.js']
 };
 
 const specs = swaggerJsdoc(swaggerOptions);
@@ -307,38 +540,53 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
       color: #ef4444 !important;
     }
     
+    /* Parameter styling */
+    .swagger-ui .parameter__name {
+      font-weight: 600 !important;
+      color: #1e293b !important;
+    }
+    
+    .swagger-ui .parameter__type {
+      color: #64748b !important;
+    }
+    
+    /* Schema styling */
+    .swagger-ui .model-title {
+      color: #2563eb !important;
+      font-weight: 700 !important;
+    }
+    
+    .swagger-ui .prop-name {
+      color: #1e293b !important;
+      font-weight: 600 !important;
+    }
+    
+    .swagger-ui .prop-type {
+      color: #64748b !important;
+    }
+    
     /* Button styling */
     .swagger-ui .btn {
       border-radius: 8px !important;
       font-weight: 600 !important;
-      padding: 8px 16px !important;
     }
     
-    .swagger-ui .btn.execute {
+    .swagger-ui .btn.authorize {
       background: #2563eb !important;
       border-color: #2563eb !important;
     }
     
-    .swagger-ui .btn.execute:hover {
+    .swagger-ui .btn.authorize:hover {
       background: #1d4ed8 !important;
-      border-color: #1d4ed8 !important;
     }
     
-    /* Input styling */
-    .swagger-ui input[type="text"],
-    .swagger-ui input[type="email"],
-    .swagger-ui input[type="password"],
-    .swagger-ui textarea {
-      border: 2px solid #e2e8f0 !important;
-      border-radius: 8px !important;
-      padding: 10px 12px !important;
-      font-size: 14px !important;
+    .swagger-ui .btn.execute {
+      background: #10b981 !important;
+      border-color: #10b981 !important;
     }
     
-    .swagger-ui input:focus,
-    .swagger-ui textarea:focus {
-      border-color: #2563eb !important;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+    .swagger-ui .btn.execute:hover {
+      background: #059669 !important;
     }
     
     /* Code blocks */
@@ -348,130 +596,13 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
       border-radius: 8px !important;
     }
     
-    /* Schema styling */
-    .swagger-ui .model {
+    /* Security section */
+    .swagger-ui .auth-wrapper {
       background: #f8fafc !important;
       border: 1px solid #e2e8f0 !important;
       border-radius: 8px !important;
-    }
-    
-    /* Security section */
-    .swagger-ui .auth-wrapper {
-      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
-      border: 1px solid #f59e0b !important;
-      border-radius: 12px !important;
-      padding: 20px !important;
-      margin: 20px 0 !important;
-    }
-    
-    /* Try it out section */
-    .swagger-ui .opblock-section {
-      background: #f8fafc !important;
-      border-radius: 8px !important;
-      margin: 10px 0 !important;
-    }
-    
-    /* Error examples styling */
-    .swagger-ui .examples {
-      background: #fef2f2 !important;
-      border: 1px solid #fecaca !important;
-      border-radius: 8px !important;
       padding: 15px !important;
     }
-    
-    /* Success examples styling */
-    .swagger-ui .examples .example {
-      background: #f0fdf4 !important;
-      border: 1px solid #bbf7d0 !important;
-      border-radius: 8px !important;
-      padding: 15px !important;
-    }
-    
-    /* Overall container */
-    .swagger-ui {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-      max-width: 1200px !important;
-      margin: 0 auto !important;
-      padding: 20px !important;
-    }
-    
-    /* Loading animation */
-    .swagger-ui .loading-container {
-      text-align: center !important;
-      padding: 40px !important;
-    }
-    
-    .swagger-ui .loading-container::after {
-      content: "🏨 Loading Hotel API Documentation..." !important;
-      font-size: 18px !important;
-      color: #2563eb !important;
-      font-weight: 600 !important;
-    }
-  `,
-  customJs: `
-    // Add modern interactions
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add smooth scrolling
-      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-          e.preventDefault();
-          const target = document.querySelector(this.getAttribute('href'));
-          if (target) {
-            target.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start'
-            });
-          }
-        });
-      });
-      
-      // Add copy to clipboard functionality
-      const copyButtons = document.querySelectorAll('.copy-to-clipboard');
-      copyButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          const text = this.getAttribute('data-copy');
-          navigator.clipboard.writeText(text).then(() => {
-            this.textContent = 'Copied!';
-            setTimeout(() => {
-              this.textContent = 'Copy';
-            }, 2000);
-          });
-        });
-      });
-      
-      // Add search functionality
-      const searchInput = document.createElement('input');
-      searchInput.type = 'text';
-      searchInput.placeholder = '🔍 Search endpoints...';
-      searchInput.style.cssText = \`
-        width: 100%;
-        padding: 12px 16px;
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 16px;
-        margin: 20px 0;
-        background: white;
-      \`;
-      
-      const mainContainer = document.querySelector('.swagger-ui');
-      if (mainContainer) {
-        mainContainer.insertBefore(searchInput, mainContainer.firstChild);
-        
-        searchInput.addEventListener('input', function() {
-          const searchTerm = this.value.toLowerCase();
-          const endpoints = document.querySelectorAll('.opblock');
-          
-          endpoints.forEach(endpoint => {
-            const text = endpoint.textContent.toLowerCase();
-            if (text.includes(searchTerm)) {
-              endpoint.style.display = 'block';
-            } else {
-              endpoint.style.display = 'none';
-            }
-          });
-        });
-      }
-    });
   `
 }));
 
@@ -480,22 +611,69 @@ app.use("/api/auth", authRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/bookings", bookingRoutes);
 
-// Basic health route
-app.get("/", (req, res) => res.send({ ok: true, message: "Hotel backend running" }));
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Hotel Booking API is running",
+    timestamp: new Date().toISOString(),
+    version: "2.0.0"
+  });
+});
 
-// Connect to MongoDB and start server
+// 404 handler
+app.use("*", (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "API endpoint not found",
+    availableEndpoints: [
+      "GET /api/health",
+      "POST /api/auth/register",
+      "POST /api/auth/login", 
+      "GET /api/auth/me",
+      "GET /api/rooms",
+      "POST /api/rooms",
+      "GET /api/rooms/:id",
+      "PUT /api/rooms/:id",
+      "DELETE /api/rooms/:id",
+      "POST /api/rooms/:id/availability",
+      "GET /api/rooms/manager/:managerId",
+      "POST /api/bookings",
+      "GET /api/bookings/my-bookings",
+      "GET /api/bookings",
+      "GET /api/bookings/:id",
+      "PUT /api/bookings/:id/status",
+      "PUT /api/bookings/:id/cancel",
+      "GET /api/bookings/stats/overview"
+    ]
+  });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    message: "Internal server error",
+    ...(process.env.NODE_ENV === 'development' && { error: err.message })
+  });
+});
+
+// MongoDB connection
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/hotel-booking")
   .then(() => {
     console.log("MongoDB connected");
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-      console.log(`Swagger UI available at: http://localhost:${PORT}/api-docs`);
-    });
   })
   .catch((err) => {
     console.error("MongoDB connection error:", err);
-    process.exit(1);
   });
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Swagger UI available at: http://localhost:${PORT}/api-docs`);
+  console.log(`API Health Check: http://localhost:${PORT}/api/health`);
+});
 
 module.exports = app;

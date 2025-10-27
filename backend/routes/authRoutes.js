@@ -24,6 +24,7 @@ const { validateRegistration } = require('../middleware/validationMiddleware');
  *               - firstName
  *               - lastName
  *               - email
+ *               - phone
  *               - password
  *             properties:
  *               firstName:
@@ -36,6 +37,12 @@ const { validateRegistration } = require('../middleware/validationMiddleware');
  *                 type: string
  *                 format: email
  *                 example: "john.doe@example.com"
+ *               phone:
+ *                 type: string
+ *                 minLength: 10
+ *                 maxLength: 10
+ *                 description: "10-digit Indian mobile number"
+ *                 example: "9876543210"
  *               password:
  *                 type: string
  *                 minLength: 6

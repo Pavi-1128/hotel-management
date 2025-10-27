@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const roomSchema = new mongoose.Schema({
+  roomNumber: {
+    type: String,
+    required: [true, 'Room number is required'],
+    trim: true,
+    unique: true
+  },
   name: {
     type: String,
     required: [true, 'Room name is required'],

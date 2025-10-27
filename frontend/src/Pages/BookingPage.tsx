@@ -25,6 +25,7 @@ const BookingPage: React.FC = () => {
   console.log("BookingPage - Offer info:", offerInfo);
 
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [newRoomNumber, setNewRoomNumber] = useState("");
   const [newName, setNewName] = useState("");
   const [newCapacity, setNewCapacity] = useState(2);
   const [newSize, setNewSize] = useState("320 sq. ft.");
@@ -81,10 +82,11 @@ const BookingPage: React.FC = () => {
   };
 
   const addRoomCard = async () => {
-    if (!newName || !newCurrentPrice || !newOriginalPrice || !newTaxes || !newTotal) return;
+    if (!newRoomNumber || !newName || !newCurrentPrice || !newOriginalPrice || !newTaxes || !newTotal) return;
 
     try {
       const roomData = {
+        roomNumber: newRoomNumber,
         name: newName,
         image: newImageDataUrl || "",
         capacity: newCapacity,
@@ -109,6 +111,7 @@ const BookingPage: React.FC = () => {
   };
 
   const resetForm = () => {
+    setNewRoomNumber("");
     setNewName("");
     setNewCapacity(2);
     setNewSize("320 sq. ft.");
@@ -128,6 +131,7 @@ const BookingPage: React.FC = () => {
 
   const openEdit = (room: Room) => {
     setEditingId(room._id);
+    setNewRoomNumber(room.roomNumber || "");
     setNewName(room.name);
     setNewCapacity(room.capacity);
     setNewSize(room.size);
@@ -147,6 +151,7 @@ const BookingPage: React.FC = () => {
     
     try {
       const roomData = {
+        roomNumber: newRoomNumber,
         name: newName,
         capacity: newCapacity,
         size: newSize,
@@ -478,6 +483,7 @@ const BookingPage: React.FC = () => {
               <button onClick={() => { setIsAddOpen(false); setIsEditOpen(false); }} className="text-2xl leading-none">×</button>
             </div>
             <div className="px-6 py-5 space-y-3 max-h-[80vh] overflow-y-auto">
+              <input type="text" placeholder="Room Number (e.g., 101, Deluxe A)" value={newRoomNumber} onChange={(e) => setNewRoomNumber(e.target.value)} className="w-full border rounded px-3 py-2"/>
               <input type="text" placeholder="Room Name" value={newName} onChange={(e) => setNewName(e.target.value)} className="w-full border rounded px-3 py-2"/>
               <input type="number" placeholder="Capacity" value={newCapacity} onChange={(e) => setNewCapacity(Number(e.target.value))} className="w-full border rounded px-3 py-2"/>
               <input type="text" placeholder="Size" value={newSize} onChange={(e) => setNewSize(e.target.value)} className="w-full border rounded px-3 py-2"/>

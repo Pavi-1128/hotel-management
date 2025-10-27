@@ -224,7 +224,11 @@ const DetailedBookingForm: React.FC<DetailedBookingFormProps> = ({ room, onClose
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
-          phone: formData.phone
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode
         }
       };
 

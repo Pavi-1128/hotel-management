@@ -10,6 +10,7 @@ export interface User {
 
 export interface Room {
   _id: string;
+  roomNumber?: string;
   name: string;
   image: string;
   capacity: number;
@@ -42,6 +43,10 @@ export interface Booking {
     lastName: string;
     email: string;
     phone: string;
+    address: string;
+    city: string;
+    state: string;
+    pincode: string;
   };
   createdAt: string;
   updatedAt: string;
@@ -81,6 +86,10 @@ export interface BookingData {
     lastName: string;
     email: string;
     phone: string;
+    address: string;
+    city: string;
+    state: string;
+    pincode: string;
   };
 }
 
