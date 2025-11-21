@@ -10,6 +10,7 @@ const swaggerUi = require("swagger-ui-express");
 const authRoutes = require("./routes/authRoutes");
 const roomRoutes = require("./routes/roomRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
+const healthRoutes = require("./routes/healthRoutes");
 
 dotenv.config();
 
@@ -607,19 +608,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
 }));
 
 // Routes
+app.use("/api", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/bookings", bookingRoutes);
-
-// Health check endpoint
-app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Hotel Booking API is running",
-    timestamp: new Date().toISOString(),
-    version: "2.0.0"
-  });
-});
 
 // 404 handler
 app.use("*", (req, res) => {

@@ -51,6 +51,7 @@ const { validateRegistration } = require('../middleware/validationMiddleware');
  *                 type: string
  *                 enum: [client, manager]
  *                 default: client
+ *                 description: "Optional. Defaults to 'client' if not provided. Users are automatically registered as clients."
  *                 example: "client"
  *     responses:
  *       201:
@@ -146,10 +147,6 @@ router.post('/register', validateRegistration, register);
  *               password:
  *                 type: string
  *                 example: "password123"
- *               role:
- *                 type: string
- *                 enum: [client, manager]
- *                 example: "client"
  *     responses:
  *       200:
  *         description: Login successful
@@ -202,11 +199,6 @@ router.post('/register', validateRegistration, register);
  *                 value:
  *                   success: false
  *                   message: "User not found with this email"
- *               wrong_role:
- *                 summary: Wrong role
- *                 value:
- *                   success: false
- *                   message: "Invalid role for this user"
  *       500:
  *         description: Internal server error
  *         content:

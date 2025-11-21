@@ -174,15 +174,288 @@ const { validateBooking } = require('../middleware/validationMiddleware');
 // All booking routes require authentication
 router.use(protect);
 
-// Client routes
-router.post('/', authorize('client'), validateBooking, createBooking);
+/**
+ * @swagger
+ * /api/bookings/my-bookings:
+ *   get:
+ *     summary: Get current user's bookings
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User bookings retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *             example:
+ *               success: true
+ *               count: 2
+ *               data:
+ *                 - _id: "507f1f77bcf86cd799439011"
+ *                   room:
+ *                     _id: "507f1f77bcf86cd799439012"
+ *                     name: "Deluxe Suite"
+ *                     image: "https://example.com/room.jpg"
+ *                     currentPrice: 20000
+ *                     total: 22000
+ *                   checkIn: "2024-01-15T00:00:00.000Z"
+ *                   checkOut: "2024-01-17T00:00:00.000Z"
+ *                   guests: 2
+ *                   totalAmount: 44000
+ *                   status: "pending"
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
 router.get('/my-bookings', getMyBookings);
+
+/**
+ * @swagger
+ * /api/bookings:
+ *   get:
+ *     summary: Get all bookings (Manager only)
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: All bookings retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *             example:
+ *               success: true
+ *               count: 10
+ *               data:
+ *                 - _id: "507f1f77bcf86cd799439011"
+ *                   room:
+ *                     _id: "507f1f77bcf86cd799439012"
+ *                     name: "Deluxe Suite"
+ *                   user:
+ *                     _id: "507f1f77bcf86cd799439013"
+ *                     email: "user@example.com"
+ *                   checkIn: "2024-01-15T00:00:00.000Z"
+ *                   checkOut: "2024-01-17T00:00:00.000Z"
+ *                   status: "confirmed"
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Manager role required
+ *       500:
+ *         description: Server error
+ */
+router.get('/', authorize('manager'), getAllBookings);
+
+/**
+ * @swagger
+ * /api/bookings/{id}:
+ *   get:
+ *     summary: Get a single booking by ID
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Booking ID
+ *     responses:
+ *       200:
+ *         description: Booking retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *             example:
+ *               success: true
+ *               data:
+ *                 _id: "507f1f77bcf86cd799439011"
+ *                 room:
+ *                   _id: "507f1f77bcf86cd799439012"
+ *                   name: "Deluxe Suite"
+ *                   image: "https://example.com/room.jpg"
+ *                   currentPrice: 20000
+ *                   total: 22000
+ *                 user:
+ *                   _id: "507f1f77bcf86cd799439013"
+ *                   email: "user@example.com"
+ *                 checkIn: "2024-01-15T00:00:00.000Z"
+ *                 checkOut: "2024-01-17T00:00:00.000Z"
+ *                 guests: 2
+ *                 totalAmount: 44000
+ *                 status: "pending"
+ *                 guestDetails:
+ *                   firstName: "John"
+ *                   lastName: "Doe"
+ *                   email: "john@example.com"
+ *                   phone: "9876543210"
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Not authorized to view this booking
+ *       404:
+ *         description: Booking not found
+ *       500:
+ *         description: Server error
+ */
 router.get('/:id', getBooking);
+
+/**
+ * @swagger
+ * /api/bookings/{id}/status:
+ *   put:
+ *     summary: Update booking status (Manager only)
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Booking ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [pending, confirmed, cancelled, completed]
+ *                 example: "confirmed"
+ *     responses:
+ *       200:
+ *         description: Booking status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *             example:
+ *               success: true
+ *               message: "Booking status updated successfully"
+ *               data:
+ *                 _id: "507f1f77bcf86cd799439011"
+ *                 status: "confirmed"
+ *       400:
+ *         description: Bad request - invalid status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *             example:
+ *               success: false
+ *               message: "Invalid status. Must be pending, confirmed, cancelled, or completed"
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Manager role required
+ *       404:
+ *         description: Booking not found
+ *       500:
+ *         description: Server error
+ */
+router.put('/:id/status', authorize('manager'), updateBookingStatus);
+
+/**
+ * @swagger
+ * /api/bookings/{id}/cancel:
+ *   put:
+ *     summary: Cancel a booking
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Booking ID
+ *     responses:
+ *       200:
+ *         description: Booking cancelled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *             example:
+ *               success: true
+ *               message: "Booking cancelled successfully"
+ *               data:
+ *                 _id: "507f1f77bcf86cd799439011"
+ *                 status: "cancelled"
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *             examples:
+ *               already_cancelled:
+ *                 summary: Booking already cancelled
+ *                 value:
+ *                   success: false
+ *                   message: "Booking is already cancelled"
+ *               completed_booking:
+ *                 summary: Cannot cancel completed booking
+ *                 value:
+ *                   success: false
+ *                   message: "Cannot cancel completed booking"
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Not authorized to cancel this booking
+ *       404:
+ *         description: Booking not found
+ *       500:
+ *         description: Server error
+ */
 router.put('/:id/cancel', cancelBooking);
 
-// Manager only routes
-router.get('/', authorize('manager'), getAllBookings);
-router.put('/:id/status', authorize('manager'), updateBookingStatus);
+/**
+ * @swagger
+ * /api/bookings/stats/overview:
+ *   get:
+ *     summary: Get booking statistics overview (Manager only)
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Booking statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *             example:
+ *               success: true
+ *               data:
+ *                 totalBookings: 50
+ *                 confirmedBookings: 35
+ *                 pendingBookings: 10
+ *                 cancelledBookings: 5
+ *                 totalRevenue: 1500000
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Manager role required
+ *       500:
+ *         description: Server error
+ */
 router.get('/stats/overview', authorize('manager'), getBookingStats);
+
+// Client routes
+router.post('/', authorize('client'), validateBooking, createBooking);
 
 module.exports = router;

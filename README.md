@@ -254,6 +254,22 @@ http://localhost:3001/api-docs
 
 If Swagger opens → setup successful.
 
+✅ 10. DEMO CREDENTIALS FOR TESTING
+
+You can use these demo credentials to test the application:
+
+**Manager Account:**
+- Email: `manager@hotel.com`
+- Password: `manager123`
+- Role: Manager (can create rooms, manage bookings, view statistics)
+
+**Client Account:**
+- Email: `client@hotel.com`
+- Password: `client123`
+- Role: Client (can browse rooms, create bookings, view own bookings)
+
+**Note:** These are demo accounts for testing purposes. You can also create new accounts using the Sign Up page.
+
 🎯 SUMMARY (WHAT TO CHECK)
 Step
 What to check
