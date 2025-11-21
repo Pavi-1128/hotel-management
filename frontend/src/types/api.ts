@@ -54,11 +54,19 @@ export interface Booking {
 
 
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   message?: string;
   data?: T;
   count?: number;
+}
+
+// Auth response has token and user at top level, not in data
+export interface AuthResponse {
+  success: boolean;
+  message?: string;
+  token: string;
+  user: User;
 }
 
 export interface LoginCredentials {
@@ -71,6 +79,7 @@ export interface RegisterData {
   firstName: string;
   lastName: string;
   email: string;
+  phone: string;
   password: string;
   role?: string;
 }

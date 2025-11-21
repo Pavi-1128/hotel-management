@@ -1,15 +1,28 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import apiService from "../services/api";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("client"); // default role
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  // Check if coming from signup page
+  useEffect(() => {
+    if (location.state?.message) {
+      setSuccessMessage(location.state.message);
+      if (location.state?.email) {
+        setEmail(location.state.email);
+      }
+      // Clear the state to prevent showing message on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +30,7 @@ const LoginPage: React.FC = () => {
     setError("");
 
     try {
-      const response = await apiService.login({ email, password, role });
+      const response = await apiService.login({ email, password });
       
       // Store token and user data
       localStorage.setItem("token", response.token || "");
@@ -85,18 +98,6 @@ const LoginPage: React.FC = () => {
                   </div>
                 </div>
 
-          <div>
-            <label className="block text-gray-700 mb-2 font-medium">Role</label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="manager">Hotel Manager</option>
-              <option value="client">Client</option>
-            </select>
-          </div>
-
           <button
             type="submit"
             disabled={loading}
@@ -104,6 +105,12 @@ const LoginPage: React.FC = () => {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
+          
+          {successMessage && (
+            <div className="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+              {successMessage}
+            </div>
+          )}
           
           {error && (
             <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -126,15 +133,14 @@ const LoginPage: React.FC = () => {
           <p className="text-gray-600 mb-2">Or use demo credentials:</p>
           <button
             onClick={() => {
-              // For demo purposes, we'll auto-register with default credentials
               const demoCredentials = {
-                manager: { email: "manager@hotel.com", password: "manager123", role: "manager" },
-                client: { email: "client@hotel.com", password: "client123", role: "client" }
+                manager: { email: "manager@hotel.com", password: "manager123" },
+                client: { email: "client@hotel.com", password: "client123" }
               };
 
-              const credentials = role === "manager" ? demoCredentials.manager : demoCredentials.client;
-              setEmail(credentials.email);
-              setPassword(credentials.password);
+              // Fill manager credentials
+              setEmail(demoCredentials.manager.email);
+              setPassword(demoCredentials.manager.password);
             }}
             className="text-gray-500 hover:text-gray-700 font-medium text-sm"
           >

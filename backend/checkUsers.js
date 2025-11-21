@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const User = require('./models/ User');
+const User = require('./models/User');
 
 const checkUsers = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/hotel_booking');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/hotel-booking');
     console.log('MongoDB connected');
     
     const users = await User.find({});
@@ -20,3 +20,4 @@ const checkUsers = async () => {
 };
 
 checkUsers();
+

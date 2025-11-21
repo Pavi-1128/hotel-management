@@ -674,6 +674,6 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Swagger UI available at: http://localhost:${PORT}/api-docs`);
   console.log(`API Health Check: http://localhost:${PORT}/api/health`);
-});
+  });
 
 module.exports = app;

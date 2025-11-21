@@ -20,8 +20,7 @@ const SignupPage: React.FC = () => {
     email: "",
     phone: "",
     password: "",
-    confirmPassword: "",
-    role: "client"
+    confirmPassword: ""
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -99,7 +98,7 @@ const SignupPage: React.FC = () => {
       const validation = validateField(field, formData[field as keyof typeof formData]);
       if (!validation.isValid) {
         errors[field] = validation.message || '';
-      }
+    }
     });
 
     if (Object.keys(errors).length > 0) {
@@ -109,25 +108,25 @@ const SignupPage: React.FC = () => {
     }
 
     try {
-      const response = await apiService.register({
+      await apiService.register({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         phone: formData.phone,
-        password: formData.password,
-        role: formData.role
+        password: formData.password
       });
 
-      // Store token and user data
-      localStorage.setItem("token", response.token || "");
-      localStorage.setItem("user", JSON.stringify(response.user || {}));
-      localStorage.setItem("role", response.user?.role || "client");
-
-      navigate("/home", { state: { role: response.user?.role || "client" } });
+      // Don't store token or auto-login - redirect to login page instead
+      // Show success message on login page
+      navigate("/login", { 
+        state: { 
+          message: "Account created successfully! Please login to continue.",
+          email: formData.email 
+        } 
+      });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Registration failed. Please try again.";
       setError(errorMessage);
-    } finally {
       setLoading(false);
     }
   };
@@ -290,19 +289,6 @@ const SignupPage: React.FC = () => {
             {fieldErrors.confirmPassword && (
               <p className="text-red-500 text-sm mt-1">{fieldErrors.confirmPassword}</p>
             )}
-          </div>
-
-          <div>
-            <label className="block text-gray-700 mb-2 font-medium">Account Type</label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="client">Guest (Book Rooms)</option>
-              <option value="manager">Hotel Manager</option>
-            </select>
           </div>
 
           <button

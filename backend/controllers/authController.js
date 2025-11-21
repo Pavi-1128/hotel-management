@@ -79,7 +79,7 @@ exports.register = async (req, res) => {
 // @access  Public
 exports.login = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password } = req.body;
 
     // Validation
     if (!email || !password) {
@@ -96,14 +96,6 @@ exports.login = async (req, res) => {
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
-      });
-    }
-
-    // Check if role matches (if provided)
-    if (role && user.role !== role) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials or role'
       });
     }
 

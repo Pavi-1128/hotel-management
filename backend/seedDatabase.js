@@ -4,20 +4,18 @@ const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 // Import models
-const User = require('./models/ User');
-const Room = require('./models/ Room');
-const Offer = require('./models/ Offer');
+const User = require('./models/User');
+const Room = require('./models/Room');
 
 const seedDatabase = async () => {
   try {
-    // Connect to MongoDB
-    await mongoose.connect(process.env.MONGO_URI);
+    // Connect to MongoDB (use same connection string as server)
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/hotel-booking');
     console.log('Connected to MongoDB');
 
     // Clear existing data
     await User.deleteMany({});
     await Room.deleteMany({});
-    await Offer.deleteMany({});
     console.log('Cleared existing data');
 
     // Create users only
@@ -26,6 +24,7 @@ const seedDatabase = async () => {
       lastName: 'Manager',
       email: 'manager@hotel.com',
       password: 'manager123',
+      phone: '9876543210',
       role: 'manager'
     });
 
@@ -34,6 +33,7 @@ const seedDatabase = async () => {
       lastName: 'Doe',
       email: 'client@hotel.com',
       password: 'client123',
+      phone: '9876543211',
       role: 'client'
     });
 
@@ -43,7 +43,6 @@ const seedDatabase = async () => {
     console.log('\n📊 Created:');
     console.log(`- ${await User.countDocuments()} users`);
     console.log(`- ${await Room.countDocuments()} rooms (0 - managers need to create rooms)`);
-    console.log(`- ${await Offer.countDocuments()} offers (0 - managers need to create offers)`);
     
     console.log('\n🔑 Demo Credentials:');
     console.log('Manager: manager@hotel.com / manager123');

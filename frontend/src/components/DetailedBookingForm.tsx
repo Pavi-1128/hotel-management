@@ -384,21 +384,21 @@ const DetailedBookingForm: React.FC<DetailedBookingFormProps> = ({ room, onClose
                   <div className={`flex items-center border rounded-lg ${
                     fieldErrors.phone ? 'border-red-500' : 'border-gray-300'
                   }`}>
-                    <div className="flex items-center px-3 py-3 border-r border-gray-300">
-                      <span className="text-2xl mr-2">🇮🇳</span>
-                      <span className="text-gray-600">+91</span>
-                    </div>
-                    <input
-                      type="tel"
-                      name="phone"
+                  <div className="flex items-center px-3 py-3 border-r border-gray-300">
+                    <span className="text-2xl mr-2">🇮🇳</span>
+                    <span className="text-gray-600">+91</span>
+                  </div>
+                  <input
+                    type="tel"
+                    name="phone"
                       placeholder="Enter 10-digit mobile number"
-                      value={formData.phone}
-                      onChange={handleInputChange}
+                    value={formData.phone}
+                    onChange={handleInputChange}
                       onBlur={handleBlur}
                       maxLength={10}
-                      className="flex-1 p-3 border-0 focus:outline-none focus:ring-0"
-                      required
-                    />
+                    className="flex-1 p-3 border-0 focus:outline-none focus:ring-0"
+                    required
+                  />
                   </div>
                   {fieldErrors.phone && (
                     <p className="text-red-500 text-sm mt-1">{fieldErrors.phone}</p>

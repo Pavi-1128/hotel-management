@@ -4,6 +4,7 @@ import type {
   Room,
   Booking,
   ApiResponse,
+  AuthResponse,
   LoginCredentials,
   RegisterData,
   BookingData,
@@ -40,7 +41,7 @@ class ApiService {
   }
 
   // Authentication APIs
-  async register(userData: RegisterData): Promise<ApiResponse<{ token: string; user: User }>> {
+  async register(userData: RegisterData): Promise<AuthResponse> {
     const response = await fetch(`${this.baseURL}/auth/register`, {
       method: 'POST',
       headers: {
@@ -48,10 +49,10 @@ class ApiService {
       },
       body: JSON.stringify(userData),
     });
-    return this.handleResponse(response);
+    return this.handleResponse<AuthResponse>(response) as Promise<AuthResponse>;
   }
 
-  async login(credentials: LoginCredentials): Promise<ApiResponse<{ token: string; user: User }>> {
+  async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const response = await fetch(`${this.baseURL}/auth/login`, {
       method: 'POST',
       headers: {
@@ -59,7 +60,7 @@ class ApiService {
       },
       body: JSON.stringify(credentials),
     });
-    return this.handleResponse(response);
+    return this.handleResponse<AuthResponse>(response) as Promise<AuthResponse>;
   }
 
   async getCurrentUser(): Promise<ApiResponse<{ user: User }>> {
